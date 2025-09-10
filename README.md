@@ -40,12 +40,18 @@ A Django web application that automatically organizes files by type and owner na
    ```
 
 6. **Access the application**
-   - Main application: http://127.0.0.1:8000/
-   - Admin interface: http://127.0.0.1:8000/admin/
+   - Main application: http:<IP Address>:8000/
+   - Admin interface: http:<IP Address>:8000/admin/
 
 ## Usage
 
+<<<<<<< HEAD
 1. Navigate to the main page (http://127.0.0.1:8000/)
+=======
+### 1. Organize Files
+
+1. Navigate to the main page (http://<IP Address>:8000/)
+>>>>>>> 9193c33e50f3e4c9ee1023ac06c6a5aa7d93ee83
 2. Enter the path to a directory containing files to organize
 3. Optionally specify an output directory (defaults to 'output' folder)
 4. Click "Organize Files" to start the process
@@ -53,6 +59,7 @@ A Django web application that automatically organizes files by type and owner na
 
 ## Supported File Types
 
+<<<<<<< HEAD
 - **Images**: PNG, JPG, JPEG, GIF, BMP, TIFF, WebP
 - **Videos**: MP4, AVI, MOV, WMV, FLV, WebM, MKV
 - **Documents**: PDF, DOC, DOCX, TXT, RTF
@@ -62,6 +69,20 @@ A Django web application that automatically organizes files by type and owner na
 - **Audio**: MP3, WAV, FLAC, AAC
 - **Code Files**: PY, JS, HTML, CSS, Java, CPP, C
 - **Other**: JSON, XML, SQL
+=======
+1. Go to the Analytics page (http://<IP Address>:8000/analytics/)
+2. Use filters to analyze specific file types, owners, or date ranges
+3. View charts showing file distribution by type and owner
+4. Browse processed files with pagination
+5. View recent processing sessions
+
+### 3. Admin Interface
+
+1. Go to http://<IP Address>/admin/
+2. Login with your superuser credentials
+3. Manage FileMetadata and ProcessingSession records
+4. View detailed information about processed files
+>>>>>>> 9193c33e50f3e4c9ee1023ac06c6a5aa7d93ee83
 
 ## Folder Structure
 
