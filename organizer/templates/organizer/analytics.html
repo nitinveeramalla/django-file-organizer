@@ -2,40 +2,8 @@
 
 {% block title %}Analytics Dashboard - File Organizer{% endblock %}
 
-{% block extra_css %}
-<style>
-    .chart-container {
-        position: relative;
-        height: 300px;
-        margin-bottom: 2rem;
-    }
-    .stats-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 1rem;
-        margin-bottom: 2rem;
-    }
-    .stat-card {
-        background: white;
-        border-radius: 8px;
-        padding: 1.5rem;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        text-align: center;
-    }
-    .stat-number {
-        font-size: 2rem;
-        font-weight: bold;
-        color: #007bff;
-    }
-    .stat-label {
-        color: #6c757d;
-        font-size: 0.9rem;
-    }
-</style>
-{% endblock %}
-
 {% block content %}
-<div class="row mb-4">
+<div class="row">
     <div class="col-12">
         <div class="card">
             <div class="card-header">
@@ -45,87 +13,47 @@
                 </h4>
             </div>
             <div class="card-body">
-                <!-- Filters -->
-                <form method="get" class="row g-3">
+                <p class="text-muted">View file processing statistics and analytics.</p>
+                
+                <div class="row">
                     <div class="col-md-3">
-                        {{ filter_form.file_type.label_tag }}
-                        {{ filter_form.file_type }}
-                    </div>
-                    <div class="col-md-3">
-                        {{ filter_form.owner_name.label_tag }}
-                        {{ filter_form.owner_name }}
-                    </div>
-                    <div class="col-md-2">
-                        {{ filter_form.date_from.label_tag }}
-                        {{ filter_form.date_from }}
-                    </div>
-                    <div class="col-md-2">
-                        {{ filter_form.date_to.label_tag }}
-                        {{ filter_form.date_to }}
-                    </div>
-                    <div class="col-md-2">
-                        <label class="form-label">&nbsp;</label>
-                        <div class="d-grid">
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-filter me-1"></i>Filter
-                            </button>
+                        <div class="stats-card card text-center">
+                            <div class="card-body">
+                                <h3 class="mb-1">{{ stats.total_files }}</h3>
+                                <p class="mb-0">Total Files</p>
+                            </div>
                         </div>
                     </div>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Statistics Cards -->
-<div class="stats-grid">
-    <div class="stat-card">
-        <div class="stat-number">{{ stats.total_files }}</div>
-        <div class="stat-label">Total Files</div>
-    </div>
-    <div class="stat-card">
-        <div class="stat-number">{{ stats.total_size|filesizeformat }}</div>
-        <div class="stat-label">Total Size</div>
-    </div>
-    <div class="stat-card">
-        <div class="stat-number">{{ stats.files_by_type|length }}</div>
-        <div class="stat-label">File Types</div>
-    </div>
-    <div class="stat-card">
-        <div class="stat-number">{{ stats.files_by_owner|length }}</div>
-        <div class="stat-label">Owners</div>
-    </div>
-</div>
-
-<!-- Charts -->
-<div class="row">
-    <div class="col-md-6">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="mb-0">Files by Type</h5>
-            </div>
-            <div class="card-body">
-                <div class="chart-container">
-                    <canvas id="filesByTypeChart"></canvas>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-6">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="mb-0">Files by Owner</h5>
-            </div>
-            <div class="card-body">
-                <div class="chart-container">
-                    <canvas id="filesByOwnerChart"></canvas>
+                    <div class="col-md-3">
+                        <div class="stats-card card text-center">
+                            <div class="card-body">
+                                <h3 class="mb-1">{{ stats.files_by_type|length }}</h3>
+                                <p class="mb-0">File Types</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stats-card card text-center">
+                            <div class="card-body">
+                                <h3 class="mb-1">{{ stats.files_by_owner|length }}</h3>
+                                <p class="mb-0">Owners</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stats-card card text-center">
+                            <div class="card-body">
+                                <h3 class="mb-1">{{ stats.recent_sessions|length }}</h3>
+                                <p class="mb-0">Sessions</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Recent Sessions -->
 <div class="row mt-4">
     <div class="col-12">
         <div class="card">
@@ -144,7 +72,6 @@
                                     <th>Status</th>
                                     <th>Started</th>
                                     <th>Duration</th>
-                                    <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -160,11 +87,6 @@
                                     </td>
                                     <td>{{ session.started_at|date:"M d, Y H:i" }}</td>
                                     <td>{{ session.duration }}</td>
-                                    <td>
-                                        <a href="{% url 'organizer:session_detail' session.session_id %}" class="btn btn-sm btn-outline-primary">
-                                            <i class="fas fa-eye"></i>
-                                        </a>
-                                    </td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
@@ -177,148 +99,4 @@
         </div>
     </div>
 </div>
-
-<!-- File List -->
-<div class="row mt-4">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="mb-0">Processed Files</h5>
-            </div>
-            <div class="card-body">
-                {% if page_obj %}
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead>
-                                <tr>
-                                    <th>Filename</th>
-                                    <th>Type</th>
-                                    <th>Owner</th>
-                                    <th>Size</th>
-                                    <th>Moved At</th>
-                                    <th>Status</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for file in page_obj %}
-                                <tr>
-                                    <td>{{ file.filename }}</td>
-                                    <td>
-                                        <span class="badge bg-primary file-type-badge">{{ file.file_type }}</span>
-                                    </td>
-                                    <td>
-                                        <span class="badge owner-badge">{{ file.owner_name }}</span>
-                                    </td>
-                                    <td>{{ file.file_size|filesizeformat }}</td>
-                                    <td>{{ file.moved_at|date:"M d, Y H:i" }}</td>
-                                    <td>
-                                        {% if file.is_duplicate %}
-                                            <span class="badge bg-warning">Duplicate</span>
-                                        {% else %}
-                                            <span class="badge bg-success">Original</span>
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                    
-                    <!-- Pagination -->
-                    {% if page_obj.has_other_pages %}
-                        <nav aria-label="File pagination">
-                            <ul class="pagination justify-content-center">
-                                {% if page_obj.has_previous %}
-                                    <li class="page-item">
-                                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
-                                    </li>
-                                {% endif %}
-                                
-                                {% for num in page_obj.paginator.page_range %}
-                                    {% if page_obj.number == num %}
-                                        <li class="page-item active">
-                                            <span class="page-link">{{ num }}</span>
-                                        </li>
-                                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
-                                        <li class="page-item">
-                                            <a class="page-link" href="?page={{ num }}">{{ num }}</a>
-                                        </li>
-                                    {% endif %}
-                                {% endfor %}
-                                
-                                {% if page_obj.has_next %}
-                                    <li class="page-item">
-                                        <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
-                                    </li>
-                                {% endif %}
-                            </ul>
-                        </nav>
-                    {% endif %}
-                {% else %}
-                    <p class="text-muted">No files found matching the current filters.</p>
-                {% endif %}
-            </div>
-        </div>
-    </div>
-</div>
-{% endblock %}
-
-{% block extra_js %}
-<script>
-// Load analytics data and create charts
-fetch('{% url "organizer:analytics_api" %}')
-    .then(response => response.json())
-    .then(data => {
-        // Files by Type Pie Chart
-        const typeCtx = document.getElementById('filesByTypeChart').getContext('2d');
-        new Chart(typeCtx, {
-            type: 'pie',
-            data: {
-                labels: Object.keys(data.files_by_type),
-                datasets: [{
-                    data: Object.values(data.files_by_type),
-                    backgroundColor: [
-                        '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0',
-                        '#9966FF', '#FF9F40', '#FF6384', '#C9CBCF'
-                    ]
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'bottom'
-                    }
-                }
-            }
-        });
-
-        // Files by Owner Bar Chart
-        const ownerCtx = document.getElementById('filesByOwnerChart').getContext('2d');
-        new Chart(ownerCtx, {
-            type: 'bar',
-            data: {
-                labels: Object.keys(data.files_by_owner),
-                datasets: [{
-                    label: 'Files',
-                    data: Object.values(data.files_by_owner),
-                    backgroundColor: '#36A2EB'
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
-                }
-            }
-        });
-    })
-    .catch(error => {
-        console.error('Error loading analytics data:', error);
-    });
-</script>
 {% endblock %}
