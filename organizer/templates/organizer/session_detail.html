@@ -1,0 +1,224 @@
+{% extends 'organizer/base.html' %}
+
+{% block title %}Session {{ session.session_id }} - File Organizer{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header {% if session.status == 'completed' %}bg-success{% elif session.status == 'failed' %}bg-danger{% else %}bg-warning{% endif %} text-white">
+                <h4 class="mb-0">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Processing Session: {{ session.session_id }}
+                </h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h5>Session Details</h5>
+                        <table class="table table-sm">
+                            <tr>
+                                <td><strong>Session ID:</strong></td>
+                                <td><code>{{ session.session_id }}</code></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Status:</strong></td>
+                                <td>
+                                    <span class="badge bg-{% if session.status == 'completed' %}success{% elif session.status == 'failed' %}danger{% else %}warning{% endif %}">
+                                        {{ session.get_status_display }}
+                                    </span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Started:</strong></td>
+                                <td>{{ session.started_at|date:"M d, Y H:i:s" }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Completed:</strong></td>
+                                <td>
+                                    {% if session.completed_at %}
+                                        {{ session.completed_at|date:"M d, Y H:i:s" }}
+                                    {% else %}
+                                        <span class="text-muted">Not completed</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Duration:</strong></td>
+                                <td>{{ session.duration }}</td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <h5>Directories</h5>
+                        <table class="table table-sm">
+                            <tr>
+                                <td><strong>Input Directory:</strong></td>
+                                <td><code>{{ session.input_directory }}</code></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Output Directory:</strong></td>
+                                <td><code>{{ session.output_directory }}</code></td>
+                            </tr>
+                        </table>
+                        
+                        <h5>Statistics</h5>
+                        <table class="table table-sm">
+                            <tr>
+                                <td><strong>Total Files:</strong></td>
+                                <td>{{ session.total_files_processed }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>File Types:</strong></td>
+                                <td>{{ session.files_by_type|length }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Owners:</strong></td>
+                                <td>{{ session.files_by_owner|length }}</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+                {% if session.error_message %}
+                    <div class="alert alert-danger mt-3">
+                        <h6><i class="fas fa-exclamation-triangle me-2"></i>Error Message</h6>
+                        <p class="mb-0">{{ session.error_message }}</p>
+                    </div>
+                {% endif %}
+
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <h5>Files by Type</h5>
+                        {% if session.files_by_type %}
+                            <div class="table-responsive">
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Type</th>
+                                            <th>Count</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for file_type, count in session.files_by_type.items %}
+                                        <tr>
+                                            <td>
+                                                <span class="badge bg-primary file-type-badge">{{ file_type }}</span>
+                                            </td>
+                                            <td>{{ count }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <p class="text-muted">No files processed</p>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <h5>Files by Owner</h5>
+                        {% if session.files_by_owner %}
+                            <div class="table-responsive">
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Owner</th>
+                                            <th>Count</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for owner, count in session.files_by_owner.items %}
+                                        <tr>
+                                            <td>
+                                                <span class="badge owner-badge">{{ owner }}</span>
+                                            </td>
+                                            <td>{{ count }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <p class="text-muted">No files processed</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Files List -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-list me-2"></i>
+                    Processed Files ({{ files|length }})
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if files %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Filename</th>
+                                    <th>Type</th>
+                                    <th>Owner</th>
+                                    <th>Size</th>
+                                    <th>Original Path</th>
+                                    <th>New Path</th>
+                                    <th>Moved At</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for file in files %}
+                                <tr>
+                                    <td>{{ file.filename }}</td>
+                                    <td>
+                                        <span class="badge bg-primary file-type-badge">{{ file.file_type }}</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge owner-badge">{{ file.owner_name }}</span>
+                                    </td>
+                                    <td>{{ file.file_size|filesizeformat }}</td>
+                                    <td>
+                                        <code class="small">{{ file.original_path|truncatechars:30 }}</code>
+                                    </td>
+                                    <td>
+                                        <code class="small">{{ file.new_path|truncatechars:30 }}</code>
+                                    </td>
+                                    <td>{{ file.moved_at|date:"M d, Y H:i" }}</td>
+                                    <td>
+                                        {% if file.is_duplicate %}
+                                            <span class="badge bg-warning">Duplicate ({{ file.duplicate_counter }})</span>
+                                        {% else %}
+                                            <span class="badge bg-success">Original</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-muted">No files found for this session.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12 text-center">
+        <a href="{% url 'organizer:analytics' %}" class="btn btn-primary">
+            <i class="fas fa-arrow-left me-1"></i>
+            Back to Analytics
+        </a>
+    </div>
+</div>
+{% endblock %}
