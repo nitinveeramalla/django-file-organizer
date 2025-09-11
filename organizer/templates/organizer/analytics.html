@@ -3,99 +3,226 @@
 {% block title %}Analytics Dashboard - File Organizer{% endblock %}
 
 {% block content %}
-<div class="row">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header">
-                <h4 class="mb-0">
-                    <i class="fas fa-chart-bar me-2"></i>
-                    Analytics Dashboard
-                </h4>
+<div class="container my-5">
+    <div class="row">
+        <div class="col-12">
+            <h2>
+                <i class="fas fa-chart-bar text-primary me-2"></i>
+                Analytics Dashboard
+            </h2>
+            <p class="text-muted">Comprehensive analytics for your file organization data</p>
+        </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card stats-card">
+                <div class="card-body text-center">
+                    <i class="fas fa-files fa-3x mb-3"></i>
+                    <h3>{{ total_files }}</h3>
+                    <p class="mb-0">Total Files</p>
+                </div>
             </div>
-            <div class="card-body">
-                <p class="text-muted">View file processing statistics and analytics.</p>
-                
-                <div class="row">
-                    <div class="col-md-3">
-                        <div class="stats-card card text-center">
-                            <div class="card-body">
-                                <h3 class="mb-1">{{ stats.total_files }}</h3>
-                                <p class="mb-0">Total Files</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="stats-card card text-center">
-                            <div class="card-body">
-                                <h3 class="mb-1">{{ stats.files_by_type|length }}</h3>
-                                <p class="mb-0">File Types</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="stats-card card text-center">
-                            <div class="card-body">
-                                <h3 class="mb-1">{{ stats.files_by_owner|length }}</h3>
-                                <p class="mb-0">Owners</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="stats-card card text-center">
-                            <div class="card-body">
-                                <h3 class="mb-1">{{ stats.recent_sessions|length }}</h3>
-                                <p class="mb-0">Sessions</p>
-                            </div>
-                        </div>
-                    </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-folder fa-3x mb-3"></i>
+                    <h3>{{ file_types|length }}</h3>
+                    <p class="mb-0">File Types</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-users fa-3x mb-3"></i>
+                    <h3>{{ owners|length }}</h3>
+                    <p class="mb-0">Unique Owners</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-history fa-3x mb-3"></i>
+                    <h3>{{ recent_sessions|length }}</h3>
+                    <p class="mb-0">Recent Sessions</p>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
-<div class="row mt-4">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="mb-0">Recent Processing Sessions</h5>
-            </div>
-            <div class="card-body">
-                {% if stats.recent_sessions %}
+    <div class="row">
+        <!-- File Type Distribution -->
+        <div class="col-lg-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-pie me-2"></i>
+                        File Type Distribution
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if file_types %}
                     <div class="table-responsive">
-                        <table class="table table-hover">
+                        <table class="table table-sm">
                             <thead>
                                 <tr>
-                                    <th>Session ID</th>
-                                    <th>Input Directory</th>
-                                    <th>Files Processed</th>
-                                    <th>Status</th>
-                                    <th>Started</th>
-                                    <th>Duration</th>
+                                    <th>File Type</th>
+                                    <th>Count</th>
+                                    <th>Percentage</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {% for session in stats.recent_sessions %}
+                                {% for file_type, count in file_types %}
                                 <tr>
-                                    <td><code>{{ session.session_id }}</code></td>
-                                    <td>{{ session.input_directory|truncatechars:30 }}</td>
-                                    <td>{{ session.total_files_processed }}</td>
                                     <td>
-                                        <span class="badge bg-{% if session.status == 'completed' %}success{% elif session.status == 'failed' %}danger{% else %}warning{% endif %}">
-                                            {{ session.get_status_display }}
-                                        </span>
+                                        <span class="badge bg-primary">{{ file_type|upper }}</span>
                                     </td>
-                                    <td>{{ session.started_at|date:"M d, Y H:i" }}</td>
-                                    <td>{{ session.duration }}</td>
+                                    <td>{{ count }}</td>
+                                    <td>
+                                        <div class="progress" style="height: 20px;">
+                                            <div class="progress-bar" role="progressbar" 
+                                                 style="width: {% widthratio count total_files 100 %}%">
+                                                {% widthratio count total_files 100 %}%
+                                            </div>
+                                        </div>
+                                    </td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
                         </table>
                     </div>
-                {% else %}
-                    <p class="text-muted">No processing sessions found.</p>
-                {% endif %}
+                    {% else %}
+                    <p class="text-muted text-center">No file type data available.</p>
+                    {% endif %}
+                </div>
             </div>
+        </div>
+
+        <!-- Owner Distribution -->
+        <div class="col-lg-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-users me-2"></i>
+                        Owner Distribution
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if owners %}
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Owner</th>
+                                    <th>Files</th>
+                                    <th>Percentage</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for owner, count in owners %}
+                                <tr>
+                                    <td>
+                                        <i class="fas fa-user text-primary me-1"></i>
+                                        {{ owner|title }}
+                                    </td>
+                                    <td>{{ count }}</td>
+                                    <td>
+                                        <div class="progress" style="height: 20px;">
+                                            <div class="progress-bar bg-success" role="progressbar" 
+                                                 style="width: {% widthratio count total_files 100 %}%">
+                                                {% widthratio count total_files 100 %}%
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-muted text-center">No owner data available.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Processing Sessions -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-history me-2"></i>
+                        Recent Processing Sessions
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if recent_sessions %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Session ID</th>
+                                    <th>Files Processed</th>
+                                    <th>Started</th>
+                                    <th>Completed</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for session in recent_sessions %}
+                                <tr>
+                                    <td>
+                                        <code>{{ session.session_id|truncatechars:8 }}</code>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-primary">{{ session.total_files_processed }}</span>
+                                    </td>
+                                    <td>{{ session.started_at|date:"M d, Y H:i" }}</td>
+                                    <td>{{ session.completed_at|date:"M d, Y H:i" }}</td>
+                                    <td>
+                                        {% if session.status == 'completed' %}
+                                        <span class="badge bg-success">Completed</span>
+                                        {% elif session.status == 'failed' %}
+                                        <span class="badge bg-danger">Failed</span>
+                                        {% else %}
+                                        <span class="badge bg-warning">Running</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <a href="{% url 'organizer:results' session.session_id %}" 
+                                           class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-muted text-center">No processing sessions found.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row mt-4">
+        <div class="col-12 text-center">
+            <a href="{% url 'organizer:home' %}" class="btn btn-primary me-2">
+                <i class="fas fa-plus me-1"></i>Process New Directory
+            </a>
+            <button class="btn btn-outline-secondary" onclick="window.location.reload()">
+                <i class="fas fa-sync-alt me-1"></i>Refresh Data
+            </button>
         </div>
     </div>
 </div>

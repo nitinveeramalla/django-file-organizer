@@ -1,0 +1,307 @@
+{% extends 'organizer/base.html' %}
+
+{% block title %}File Organizer - Home{% endblock %}
+
+{% block content %}
+<div class="hero-section">
+    <div class="container text-center">
+        <h1 class="display-4 mb-4">
+            <i class="fas fa-sort-amount-down me-3"></i>
+            File Organizer
+        </h1>
+        <p class="lead mb-4">
+            Organize your files by type and owner for better data analytics
+        </p>
+    </div>
+</div>
+
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-upload me-2"></i>
+                        Upload Directory Path
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="mb-4">
+                            <label for="input_path" class="form-label">
+                                <i class="fas fa-folder me-2"></i>
+                                Directory Path
+                            </label>
+                            <div class="input-group">
+                                <input type="text" 
+                                       class="form-control form-control-lg" 
+                                       id="input_path" 
+                                       name="input_path" 
+                                       placeholder="Select or enter the full path to your directory"
+                                       required>
+                                <button class="btn btn-outline-secondary" type="button" id="browse_btn">
+                                    <i class="fas fa-folder-open me-1"></i>Browse
+                                </button>
+                            </div>
+                            <div class="mt-2">
+                                <small class="text-muted">
+                                    <i class="fas fa-lightbulb me-1"></i>
+                                    <strong>Quick tip:</strong> You can also drag and drop a folder from your file explorer into the input field above!
+                                </small>
+                            </div>
+                            <div class="form-text">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Click "Browse" to select a directory, use <kbd>Ctrl+O</kbd> shortcut, or enter the full path manually.
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-play me-2"></i>
+                                Start File Organization
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-5">
+        <div class="col-md-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <i class="fas fa-sitemap fa-3x text-primary mb-3"></i>
+                    <h5>Organized Structure</h5>
+                    <p class="text-muted">
+                        Files are organized by type and owner in a structured folder hierarchy.
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <i class="fas fa-database fa-3x text-success mb-3"></i>
+                    <h5>Data Analytics</h5>
+                    <p class="text-muted">
+                        Complete metadata logging for analytics and reporting purposes.
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <i class="fas fa-shield-alt fa-3x text-warning mb-3"></i>
+                    <h5>Safe Processing</h5>
+                    <p class="text-muted">
+                        Duplicate handling and error management for reliable file processing.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-info-circle me-2"></i>
+                        How It Works
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-list-ol me-2"></i>Supported File Types:</h6>
+                            <div class="row">
+                                <div class="col-6">
+                                    <ul class="list-unstyled">
+                                        <li><span class="badge bg-secondary me-1">.png</span> Images</li>
+                                        <li><span class="badge bg-secondary me-1">.jpg</span> Images</li>
+                                        <li><span class="badge bg-secondary me-1">.mp4</span> Videos</li>
+                                        <li><span class="badge bg-secondary me-1">.pdf</span> Documents</li>
+                                        <li><span class="badge bg-secondary me-1">.csv</span> Data</li>
+                                    </ul>
+                                </div>
+                                <div class="col-6">
+                                    <ul class="list-unstyled">
+                                        <li><span class="badge bg-secondary me-1">.py</span> Python</li>
+                                        <li><span class="badge bg-secondary me-1">.js</span> JavaScript</li>
+                                        <li><span class="badge bg-secondary me-1">.zip</span> Archives</li>
+                                        <li><span class="badge bg-secondary me-1">.mp3</span> Audio</li>
+                                        <li><span class="badge bg-secondary me-1">.txt</span> Text</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-folder-tree me-2"></i>Output Structure:</h6>
+                            <pre class="bg-light p-3 rounded"><code>output/
+├── pngfiles/
+│   ├── rohith/
+│   └── sachin/
+├── mp4files/
+│   ├── rohith/
+│   └── sachin/
+└── pdffiles/
+    ├── rohith/
+    └── sachin/</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const browseBtn = document.getElementById('browse_btn');
+    const inputPath = document.getElementById('input_path');
+    
+    browseBtn.addEventListener('click', function() {
+        // Create a hidden file input for directory selection
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.webkitdirectory = true;
+        input.multiple = true;
+        input.style.display = 'none';
+        
+        input.addEventListener('change', function(e) {
+            if (e.target.files.length > 0) {
+                // Get the directory path from the first file
+                const firstFile = e.target.files[0];
+                const fullPath = firstFile.webkitRelativePath;
+                const directoryPath = fullPath.substring(0, fullPath.indexOf('/'));
+                
+                // For security reasons, we can't get the full system path
+                // So we'll show a message and let the user know they need to enter the full path
+                inputPath.value = '';
+                inputPath.placeholder = 'Please enter the full system path to the directory';
+                
+                // Show a helpful message
+                showDirectoryMessage();
+            }
+        });
+        
+        document.body.appendChild(input);
+        input.click();
+        document.body.removeChild(input);
+    });
+    
+    function showDirectoryMessage() {
+        // Create a temporary alert message
+        const alertDiv = document.createElement('div');
+        alertDiv.className = 'alert alert-info alert-dismissible fade show mt-3';
+        alertDiv.innerHTML = `
+            <i class="fas fa-info-circle me-2"></i>
+            <strong>Note:</strong> For security reasons, browsers cannot provide the full system path. 
+            Please copy the directory path from your file explorer and paste it in the input field above.
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        
+        // Insert after the form
+        const form = document.querySelector('form');
+        form.parentNode.insertBefore(alertDiv, form.nextSibling);
+        
+        // Auto-dismiss after 10 seconds
+        setTimeout(() => {
+            if (alertDiv.parentNode) {
+                alertDiv.remove();
+            }
+        }, 10000);
+    }
+    
+    // Add paste functionality
+    inputPath.addEventListener('paste', function(e) {
+        setTimeout(() => {
+            const value = e.target.value.trim();
+            if (value && (value.includes('\\') || value.includes('/'))) {
+                // Validate if it looks like a path
+                if (value.length > 3) {
+                    e.target.classList.remove('is-invalid');
+                    e.target.classList.add('is-valid');
+                }
+            }
+        }, 100);
+    });
+    
+    // Add validation on input
+    inputPath.addEventListener('input', function(e) {
+        const value = e.target.value.trim();
+        if (value.length > 3 && (value.includes('\\') || value.includes('/'))) {
+            e.target.classList.remove('is-invalid');
+            e.target.classList.add('is-valid');
+        } else if (value.length > 0) {
+            e.target.classList.remove('is-valid');
+            e.target.classList.add('is-invalid');
+        } else {
+            e.target.classList.remove('is-valid', 'is-invalid');
+        }
+    });
+    
+    // Add drag and drop functionality
+    inputPath.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        e.target.classList.add('border-primary', 'bg-light');
+    });
+    
+    inputPath.addEventListener('dragleave', function(e) {
+        e.preventDefault();
+        e.target.classList.remove('border-primary', 'bg-light');
+    });
+    
+    inputPath.addEventListener('drop', function(e) {
+        e.preventDefault();
+        e.target.classList.remove('border-primary', 'bg-light');
+        
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            // Try to get the directory path from the dropped files
+            const firstFile = files[0];
+            if (firstFile.webkitRelativePath) {
+                const fullPath = firstFile.webkitRelativePath;
+                const directoryPath = fullPath.substring(0, fullPath.indexOf('/'));
+                inputPath.value = directoryPath;
+                inputPath.classList.add('is-valid');
+                showSuccessMessage('Directory path extracted from dropped files!');
+            } else {
+                // Show message that user needs to enter full path
+                showDirectoryMessage();
+            }
+        }
+    });
+    
+    function showSuccessMessage(message) {
+        const alertDiv = document.createElement('div');
+        alertDiv.className = 'alert alert-success alert-dismissible fade show mt-3';
+        alertDiv.innerHTML = `
+            <i class="fas fa-check-circle me-2"></i>
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        
+        const form = document.querySelector('form');
+        form.parentNode.insertBefore(alertDiv, form.nextSibling);
+        
+        setTimeout(() => {
+            if (alertDiv.parentNode) {
+                alertDiv.remove();
+            }
+        }, 5000);
+    }
+    
+    // Add keyboard shortcut (Ctrl+O) to open browse dialog
+    document.addEventListener('keydown', function(e) {
+        if (e.ctrlKey && e.key === 'o') {
+            e.preventDefault();
+            browseBtn.click();
+        }
+    });
+});
+</script>
+{% endblock %}
