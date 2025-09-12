@@ -3,10 +3,13 @@ import shutil
 from pathlib import Path
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse, Http404
 from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
+from django.conf import settings
 from .models import FileMetadata, ProcessingSession
+from .text_analysis import analyze_text_file, get_file_dates
+from .csv_export import generate_csv_export, get_csv_preview, get_analytics_summary
 import json
 
 
@@ -111,6 +114,15 @@ def process_files(request, input_path):
                     # Get file size
                     file_size = os.path.getsize(new_file_path)
                     
+                    # Get file dates
+                    created_date, modified_date = get_file_dates(new_file_path)
+                    
+                    # Analyze text content for text-based files
+                    keywords = ""
+                    summary = ""
+                    if file_ext in ['.txt', '.csv', '.pdf', '.docx']:
+                        keywords, summary = analyze_text_file(new_file_path)
+                    
                     # Create metadata record
                     FileMetadata.objects.create(
                         original_path=file_path,
@@ -119,6 +131,10 @@ def process_files(request, input_path):
                         file_type=file_ext,
                         file_size=file_size,
                         owner_name=owner_name,
+                        created_date=created_date,
+                        modified_date=modified_date,
+                        keywords=keywords,
+                        summary=summary,
                         moved_at=timezone.now()
                     )
                     
@@ -134,6 +150,14 @@ def process_files(request, input_path):
         session.status = 'completed'
         session.completed_at = timezone.now()
         session.save()
+        
+        # Generate CSV export
+        try:
+            csv_path, csv_filename = generate_csv_export(session.session_id)
+            session.csv_file = csv_filename
+            session.save()
+        except Exception as e:
+            print(f"Error generating CSV: {e}")
         
         # Prepare summary message
         summary_parts = [f"{total_files} files processed"]
@@ -196,9 +220,13 @@ def results(request, session_id):
             moved_at__gte=session.started_at
         ).order_by('-moved_at')[:20]
         
+        # Get CSV preview data
+        csv_preview = get_csv_preview(20)
+        
         context = {
             'session': session,
             'recent_files': recent_files,
+            'csv_preview': csv_preview,
         }
         return render(request, 'organizer/results.html', context)
     except ProcessingSession.DoesNotExist:
@@ -213,23 +241,43 @@ def analytics(request):
         status='completed'
     ).order_by('-completed_at')[:10]
     
-    # Get file type distribution
-    file_types = {}
-    file_metadata = FileMetadata.objects.all()
-    
-    for file in file_metadata:
-        file_types[file.file_type] = file_types.get(file.file_type, 0) + 1
-    
-    # Get owner distribution
-    owners = {}
-    for file in file_metadata:
-        owners[file.owner_name] = owners.get(file.owner_name, 0) + 1
+    # Get analytics summary
+    analytics_data = get_analytics_summary()
     
     context = {
         'recent_sessions': recent_sessions,
-        'file_types': sorted(file_types.items(), key=lambda x: x[1], reverse=True),
-        'owners': sorted(owners.items(), key=lambda x: x[1], reverse=True),
-        'total_files': file_metadata.count(),
+        'file_types': list(analytics_data['file_types'].items()),
+        'owners': list(analytics_data['owners'].items()),
+        'total_files': analytics_data['total_files'],
+        'total_size_mb': analytics_data['total_size_mb'],
+        'text_analyzed': analytics_data['text_analyzed'],
     }
     
     return render(request, 'organizer/analytics.html', context)
+
+
+def download_csv(request, session_id=None):
+    """Download CSV file"""
+    try:
+        if session_id:
+            session = ProcessingSession.objects.get(session_id=session_id)
+            if session.csv_file:
+                file_path = os.path.join(settings.BASE_DIR, 'media', session.csv_file)
+            else:
+                # Generate CSV if not exists
+                file_path, filename = generate_csv_export(session_id)
+        else:
+            # Generate general CSV
+            file_path, filename = generate_csv_export()
+        
+        if os.path.exists(file_path):
+            with open(file_path, 'rb') as f:
+                response = HttpResponse(f.read(), content_type='text/csv')
+                response['Content-Disposition'] = f'attachment; filename="{os.path.basename(file_path)}"'
+                return response
+        else:
+            raise Http404("CSV file not found")
+    
+    except Exception as e:
+        messages.error(request, f'Error downloading CSV: {str(e)}')
+        return redirect('organizer:home')

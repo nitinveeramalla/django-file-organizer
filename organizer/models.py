@@ -11,6 +11,10 @@ class FileMetadata(models.Model):
     file_type = models.CharField(max_length=50, help_text='File extension/type', default='')
     file_size = models.BigIntegerField(help_text='File size in bytes', default=0)
     owner_name = models.CharField(max_length=100, help_text='Owner name extracted from filename', default='unknown')
+    created_date = models.DateTimeField(help_text='File creation date', null=True, blank=True)
+    modified_date = models.DateTimeField(help_text='File modification date', null=True, blank=True)
+    keywords = models.TextField(help_text='Extracted keywords from file content', blank=True, default='')
+    summary = models.TextField(help_text='Auto-generated summary of file content', blank=True, default='')
     created_at = models.DateTimeField(default=timezone.now, help_text='When the record was created')
     moved_at = models.DateTimeField(default=timezone.now, help_text='When the file was moved')
     is_duplicate = models.BooleanField(default=False, help_text='Whether this was a duplicate filename')
@@ -43,6 +47,7 @@ class ProcessingSession(models.Model):
     completed_at = models.DateTimeField(blank=True, null=True, help_text='When processing completed')
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='running')
     error_message = models.TextField(blank=True, help_text='Error message if processing failed')
+    csv_file = models.CharField(max_length=255, blank=True, help_text='Generated CSV filename')
     
     class Meta:
         verbose_name = 'Processing Session'

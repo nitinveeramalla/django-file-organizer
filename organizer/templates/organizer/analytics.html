@@ -54,6 +54,37 @@
         </div>
     </div>
 
+    <!-- Additional Analytics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card bg-info text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-hdd fa-3x mb-3"></i>
+                    <h3>{{ total_size_mb }} MB</h3>
+                    <p class="mb-0">Total Storage Used</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-success text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-file-alt fa-3x mb-3"></i>
+                    <h3>{{ text_analyzed }}</h3>
+                    <p class="mb-0">Files Analyzed</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-secondary text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-percentage fa-3x mb-3"></i>
+                    <h3>{% if total_files > 0 %}{{ text_analyzed|floatformat:0|div:total_files|mul:100|floatformat:1 }}{% else %}0{% endif %}%</h3>
+                    <p class="mb-0">Analysis Coverage</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="row">
         <!-- File Type Distribution -->
         <div class="col-lg-6 mb-4">
@@ -219,6 +250,9 @@
         <div class="col-12 text-center">
             <a href="{% url 'organizer:home' %}" class="btn btn-primary me-2">
                 <i class="fas fa-plus me-1"></i>Process New Directory
+            </a>
+            <a href="{% url 'organizer:download_csv' %}" class="btn btn-success me-2">
+                <i class="fas fa-download me-1"></i>Download CSV
             </a>
             <button class="btn btn-outline-secondary" onclick="window.location.reload()">
                 <i class="fas fa-sync-alt me-1"></i>Refresh Data
